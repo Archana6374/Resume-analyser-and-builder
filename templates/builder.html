@@ -1,0 +1,440 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="resume-portal">
+  <div
+    id="resume-builder-config"
+    data-manual-payment-testing="{{ manual_payment_testing|yesno:'true,false' }}"
+    data-razorpay-configured="{{ razorpay_configured|yesno:'true,false' }}"
+    hidden
+  ></div>
+  <div class="progress-bar">
+    <div class="step active" id="step-landing">
+      <span class="step-circle"><span class="step-number">1</span><span class="step-check">&#10003;</span></span>
+      <span class="step-title">Start</span>
+    </div>
+    <div class="step" id="step-builder">
+      <span class="step-circle"><span class="step-number">2</span><span class="step-check">&#10003;</span></span>
+      <span class="step-title">Details</span>
+    </div>
+    <div class="step" id="step-template">
+      <span class="step-circle"><span class="step-number">3</span><span class="step-check">&#10003;</span></span>
+      <span class="step-title">Template</span>
+    </div>
+    <div class="step" id="step-preview">
+      <span class="step-circle"><span class="step-number">4</span><span class="step-check">&#10003;</span></span>
+      <span class="step-title">Preview</span>
+    </div>
+    <div class="step" id="step-export">
+      <span class="step-circle"><span class="step-number">5</span><span class="step-check">&#10003;</span></span>
+      <span class="step-title">Export</span>
+    </div>
+  </div>
+<main class="container content-stack pb-4">
+  <!-- <section class="hero-section" id="landing-section">
+  <div class="hero-shell">
+    
+    <span class="portal-badge">AI Resume Builder</span>
+    
+    <h1>Build Job-Winning Resumes in Minutes</h1>
+    
+    <p class="hero-lead">
+      Create professional, ATS-friendly resumes with guided inputs, live preview, and smart scoring.
+    </p>
+
+    <div class="hero-actions">
+      <div class="hero-card" id="card-builder" role="button" tabindex="0" onclick="window.setVisible && window.setVisible('builder-section')" onkeypress="if (event.key === 'Enter') window.setVisible && window.setVisible('builder-section')">
+        <h3>Create Resume</h3>
+        <p>Step-by-step guided builder</p>
+        <small>Best for fresh resumes</small>
+      </div>
+
+      <div class="hero-card" id="card-ats" role="button" tabindex="0" onclick="window.setVisible && window.setVisible('ats-section')" onkeypress="if (event.key === 'Enter') window.setVisible && window.setVisible('ats-section')">
+        <h3>Check ATS Score</h3>
+        <p>Optimize your resume</p>
+        <small>Improve job matching</small>
+      </div>
+    </div>
+
+    <div class="hero-metrics">
+      <div>
+        <strong>95%</strong>
+        <span>ATS Compatibility</span>
+      </div>
+      <div>
+        <strong>2 Min</strong>
+        <span>Resume Creation Time</span>
+      </div>
+      <div>
+        <strong>Modern</strong>
+        <span>Professional Templates</span>
+      </div>
+    </div>
+
+  </div>
+</section> -->
+  <section class="panel hidden" id="builder-section">
+    <div class="section-heading">
+      <div>
+        <span class="eyebrow">Resume Builder</span>
+        <h2>Create a professional resume with guided details</h2>
+        <p>Use the form below to generate a clean preview and export it in multiple formats.</p>
+      </div>
+      <div class="builder-badges">
+        <span>Guided Fields</span>
+        <span>Live Preview</span>
+        <span>Export Ready</span>
+      </div>
+    </div>
+
+    <div class="builder-layout">
+      <form id="resume-form" class="builder-form">
+        <div class="form-columns">
+          <fieldset>
+            <legend>Personal Details</legend>
+            <label>Full Name <input type="text" name="name" required></label>
+            <label>Email <input type="email" name="email" required></label>
+            <label>Phone <input type="tel" name="phone" required></label>
+            <label>LinkedIn <input type="url" name="linkedin" placeholder="https://..."></label>
+            <label>GitHub <input type="url" name="github"></label>
+            <label>Portfolio <input type="url" name="portfolio"></label>
+            <label>Summary <textarea name="summary" rows="4" placeholder="Career summary"></textarea></label>
+          </fieldset>
+
+          <fieldset>
+            <legend>Skills</legend>
+            <label>Technical Skills
+              <input type="text" name="tech_skills" placeholder="Python, Django, SQL">
+            </label>
+            <label>Soft Skills
+              <input type="text" name="soft_skills" placeholder="Leadership, Communication">
+            </label>
+          </fieldset>
+        </div>
+
+        <div class="form-columns form-columns--wide">
+          <fieldset>
+            <legend>Experience</legend>
+            <div id="experience-items"></div>
+            <button type="button" id="add-experience">+ Add Experience</button>
+          </fieldset>
+
+          <fieldset>
+            <legend>Education</legend>
+            <div id="education-items"></div>
+            <button type="button" id="add-education">+ Add Education</button>
+          </fieldset>
+        </div>
+
+        <fieldset>
+          <legend>Extracurricular Activities</legend>
+          <textarea name="activities" rows="3" placeholder="Clubs, hackathons, volunteering"></textarea>
+        </fieldset>
+
+        <fieldset>
+          <legend>Projects & Certifications</legend>
+          <label>Projects
+            <textarea name="projects" rows="3" placeholder="Project title, role, contributions"></textarea>
+          </label>
+          <label>Certifications
+            <textarea name="certifications" rows="3" placeholder="AWS certified, PMP, etc."></textarea>
+          </label>
+        </fieldset>
+
+        <div class="action-row">
+          <button type="button" id="browse-templates">Browse 11 Templates</button>
+          <button type="button" id="generate">Generate Resume</button>
+        </div>
+      </form>
+
+      <aside class="builder-sidebar">
+        <div class="builder-sidebar-card">
+          <div class="builder-sidebar-copy">
+            <span class="mini-label">Selected Template Preview</span>
+            <h3 id="builder-selected-template-name">Classic</h3>
+            <p id="builder-selected-template-copy">Your selected design appears here while you fill in resume details.</p>
+          </div>
+          <div class="builder-sidebar-preview-shell">
+            <div id="builder-template-preview" class="resume-output template-live-preview" data-template-preview-target>
+              Choose a template to see the live preview.
+            </div>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <section class="panel hidden" id="template-panel">
+    <div class="section-heading">
+      <div>
+        <span class="eyebrow">Template Management</span>
+        <h2>Choose your favorite template design</h2>
+        <p>Pick a layout, try a color, and keep that exact style when you download. Premium templates unlock after payment.</p>
+      </div>
+      <div class="builder-badges">
+        <span>11 Designs</span>
+        <span>Live Preview</span>
+        <span>Color Choice</span>
+      </div>
+    </div>
+
+    <div class="template-toolbar">
+      <div>
+        <span class="mini-label">Selected Template</span>
+        <h3 id="selected-template-name">Classic</h3>
+        <p id="selected-template-copy" class="template-copy">Clean headings, structured sections, and strong ATS readability.</p>
+      </div>
+      <label class="color-picker-label" for="accent-color-picker">
+        Accent Color
+        <input type="color" id="accent-color-picker" value="#0f4c81" aria-label="Accent Color">
+      </label>
+    </div>
+
+    <div class="template-filter-bar" id="template-filter-bar" aria-label="Template Filters">
+      <button type="button" class="template-filter active" data-filter="all">All</button>
+      <button type="button" class="template-filter" data-filter="ats">ATS</button>
+      <button type="button" class="template-filter" data-filter="professional">Professional</button>
+      <button type="button" class="template-filter" data-filter="creative">Creative</button>
+      <button type="button" class="template-filter" data-filter="compact">Compact</button>
+      <button type="button" class="template-filter" data-filter="premium">Premium</button>
+    </div>
+
+    <div id="template-gallery" class="template-gallery" aria-live="polite"></div>
+
+    <div class="template-live-panel">
+      <div class="section-heading">
+        <div>
+          <span class="eyebrow">Live Preview</span>
+          <h2>See the selected template before download</h2>
+          <p>The download will use this same selected design and color.</p>
+        </div>
+      </div>
+      <div id="template-live-preview" class="resume-output template-live-preview" data-template-preview-target>Choose a template to see the live preview.</div>
+    </div>
+
+    <div class="action-row">
+      <button type="button" id="use-selected-template">Use Selected Template</button>
+    </div>
+  </section>
+
+  <section class="panel hidden" id="payment-panel">
+    <div class="section-heading">
+      <div>
+        <span class="eyebrow">Payment Gateway</span>
+        <h2>Unlock premium resume templates</h2>
+        <p>Complete a one-time Razorpay checkout to use the selected premium design in preview and export.</p>
+      </div>
+      <div class="builder-badges">
+        <span>4 Premium Templates</span>
+        <span>{% if manual_payment_testing %}Manual Test Mode{% else %}Secure Checkout UI{% endif %}</span>
+        <span>Instant Unlock</span>
+      </div>
+    </div>
+
+    <div class="payment-gateway-shell">
+      <div class="payment-plan-card">
+        <span class="mini-label">Selected Premium Template</span>
+        <h3 id="payment-template-name">Executive</h3>
+        <p id="payment-template-copy">Leadership-first presentation with strong headers and compact side summaries.</p>
+
+        <div class="payment-plan-price">
+          <strong id="payment-template-price">Rs.199</strong>
+          <span>one-time unlock</span>
+        </div>
+
+        <ul class="payment-plan-points">
+          <li>Premium layout access</li>
+          <li>Live preview with color customization</li>
+          <li>HTML, PDF, and DOC export support</li>
+        </ul>
+
+        <p id="payment-mode-note" class="section-meta">
+          {% if manual_payment_testing %}
+          Manual payment testing is enabled. No live charge will be created.
+          {% else %}
+          Live Razorpay checkout will open for this purchase.
+          {% endif %}
+        </p>
+
+        <div id="payment-debug-panel" class="info-card soft-card mt-3">
+          <h3>Debug Info</h3>
+          <p class="mb-1">Current template: <strong id="debug-current-template">classic</strong></p>
+          <p class="mb-1">Manual mode: <strong id="debug-manual-mode">{% if manual_payment_testing %}ON{% else %}OFF{% endif %}</strong></p>
+          <p class="mb-1">Razorpay configured: <strong id="debug-razorpay-configured">{% if razorpay_configured %}YES{% else %}NO{% endif %}</strong></p>
+          <p class="mb-0">Last payment status: <strong id="debug-payment-status">Idle</strong></p>
+        </div>
+      </div>
+
+      <form id="premium-payment-form" class="payment-form">
+        <div class="payment-method-grid">
+          <label class="payment-method active">
+            <input type="radio" name="payment_method" value="upi" checked>
+            <span>UPI</span>
+            <small>Fast unlock for mobile payments</small>
+          </label>
+          <label class="payment-method">
+            <input type="radio" name="payment_method" value="card">
+            <span>Card</span>
+            <small>Debit or credit card checkout</small>
+          </label>
+          <label class="payment-method">
+            <input type="radio" name="payment_method" value="wallet">
+            <span>Wallet</span>
+            <small>Use a saved balance or app wallet</small>
+          </label>
+        </div>
+
+        <div class="payment-form-grid">
+          <label>
+            Full Name
+            <input type="text" name="payer_name" placeholder="Enter your full name" required>
+          </label>
+          <label>
+            Email
+            <input type="email" name="payer_email" placeholder="Enter your email" required>
+          </label>
+          <label>
+            Reference / UPI ID
+            <input type="text" name="payment_reference" placeholder="name@bank or last 4 digits" required>
+          </label>
+          <label>
+            Billing Country
+            <input type="text" name="billing_country" value="India" required>
+          </label>
+        </div>
+
+        <div class="payment-trust-bar">
+          <span>Razorpay secure checkout</span>
+          <span>No recurring billing</span>
+          <span>Unlock in this browser instantly</span>
+        </div>
+
+        <div class="action-row">
+          <button type="button" id="back-to-templates" class="btn-secondary">Back to Templates</button>
+          <button type="submit" id="complete-payment">Pay & Unlock Template</button>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <section class="panel hidden" id="ats-section">
+    <div class="section-heading">
+      <div>
+        <span class="eyebrow">ATS Score Calculator</span>
+        <h2>Check your resume readiness</h2>
+        <p>Generate an instant score from the builder content and improve weak sections quickly.</p>
+      </div>
+    </div>
+
+    <div class="ats-layout">
+      <div>
+        <div id="ats-score" class="score-bubble">0</div>
+        <p id="ats-feedback">Complete resume builder entries and click &quot;Generate Score&quot;.</p>
+        <button id="generate-score" type="button">Generate Score</button>
+      </div>
+
+      <div class="info-card soft-card">
+        <h3>What improves the score?</h3>
+        <ul>
+          <li>Clear summary and contact details</li>
+          <li>Relevant work experience bullets</li>
+          <li>Job-specific technical skills</li>
+          <li>Simple structure with standard headings</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel hidden" id="preview-panel">
+    <div class="section-heading">
+      <div>
+        <span class="eyebrow">Resume Preview</span>
+        <h2>Live output</h2>
+        <p class="section-meta">If the design isn't right, choose a different template and reapply it instantly.</p>
+      </div>
+    </div>
+
+    <div class="resume-template-switcher">
+      <label>Select a different template
+        <select id="preview-template-select" aria-label="Preview Template">
+          <option value="classic">Classic (ATS-friendly)</option>
+          <option value="modern">Modern Professional</option>
+          <option value="executive">Executive ATS - Premium</option>
+          <option value="creative">Creative</option>
+          <option value="minimal">Minimal Editorial</option>
+          <option value="bold">Bold Contrast</option>
+          <option value="timeline">Timeline Focus</option>
+          <option value="studio">Studio Portfolio - Premium</option>
+          <option value="compact">Compact Pro</option>
+          <option value="prestige">Prestige Editorial - Premium</option>
+          <option value="signature">Signature Luxe - Premium</option>
+        </select>
+      </label>
+      <label class="color-picker-label" for="preview-accent-color">
+        Accent Color
+        <input type="color" id="preview-accent-color" value="#0f4c81" aria-label="Preview Accent Color">
+      </label>
+      <button type="button" id="preview-render-template">Apply Template</button>
+    </div>
+
+    <div id="resume-output" class="resume-output">Resume output will appear here after generation.</div>
+
+    <div class="action-row">
+      <button type="button" id="finalize-template">Done</button>
+    </div>
+  </section>
+
+  <section class="panel hidden" id="export-panel">
+    <div class="section-heading">
+      <div>
+        <span class="eyebrow">Export</span>
+        <h2>Download your resume</h2>
+      </div>
+    </div>
+    <div class="export-actions">
+      <button id="export-html" type="button">Download HTML</button>
+      <button id="export-pdf" type="button">Download PDF</button>
+      <button id="export-docx" type="button">Download DOCX</button>
+    </div>
+    <small class="d-block mt-2">PDF export uses your browser print dialog.</small>
+
+    <div id="post-download-actions" class="hidden mt-4">
+      <p class="text-success">Download completed! Your resume is ready.</p>
+      <button id="go-home" type="button" class="btn-primary">Go to Home</button>
+    </div>
+  </section>
+</main>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script src="{% static 'js/script.js' %}?v=111"></script>
+<script>if (typeof setVisible === 'function') setVisible(window.location.pathname.includes('/builder') ? 'builder-section' : 'landing-section');</script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    // function setVisible(sectionId) {
+    //     const sections = document.querySelectorAll('.panel');
+
+    //     sections.forEach(section => {
+    //         section.classList.add('hidden');
+    //     });
+
+    //     const target = document.getElementById(sectionId);
+    //     if (target) {
+    //         target.classList.remove('hidden');
+    //     }
+    // }
+
+    // ALWAYS show builder when on /builder/
+    // if (window.location.pathname.includes('/builder')) {
+    //     setVisible('builder-section');
+    // }
+    if (typeof setVisible === 'function') {
+        setVisible('builder-section');
+    }
+});
+</script>
+
+{% endblock %}

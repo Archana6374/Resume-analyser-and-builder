@@ -1,0 +1,290 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="resume-portal">
+<main class="container content-stack pb-4">
+  {% if resume %}
+
+  <!-- Feedback Header -->
+  <section class="panel">
+    <div class="section-heading">
+      <div>
+        <h2>Share Your Feedback</h2>
+        <p>Help us improve for {{ resume.original_filename }}</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Feedback Form -->
+  <section class="panel">
+    <form method="post" action="/analyzer/feedback/" class="feedback-form">
+      {% csrf_token %}
+
+      <!-- Rating -->
+      <div class="form-group">
+        <label class="form-label">
+          <strong>Overall Rating</strong>
+          <span class="required">*</span>
+        </label>
+        <div class="rating-container">
+          <span class="rating-label">Poor</span>
+          <div class="rating-stars">
+            <input type="radio" id="star1" name="rating" value="1">
+            <label for="star1" title="Poor">★</label>
+            <input type="radio" id="star2" name="rating" value="2">
+            <label for="star2" title="Fair">★</label>
+            <input type="radio" id="star3" name="rating" value="3">
+            <label for="star3" title="Good">★</label>
+            <input type="radio" id="star4" name="rating" value="4">
+            <label for="star4" title="Very Good">★</label>
+            <input type="radio" id="star5" name="rating" value="5">
+            <label for="star5" title="Excellent">★</label>
+          </div>
+          <span class="rating-label">Excellent</span>
+        </div>
+      </div>
+
+      <!-- Comments -->
+      <div class="form-group">
+        <label for="comments"><strong>Comments</strong></label>
+        <textarea name="comments" id="comments" class="form-control" rows="4"></textarea>
+      </div>
+
+      <!-- Submit -->
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary">Submit</button>
+      </div>
+
+    </form>
+  </section>
+
+  {% else %}
+  <section class="panel">
+    <h2>No Resume Found</h2>
+    <a href="/analyzer/upload/" class="btn btn-primary">Upload Resume</a>
+  </section>
+  {% endif %}
+</main>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const form = document.querySelector('.feedback-form');
+    const stars = document.querySelectorAll('.rating-stars label');
+    const inputs = document.querySelectorAll('.rating-stars input');
+    const commentsTextarea = document.getElementById('comments');
+    const submitButton = document.querySelector('button[type="submit"]');
+
+    function updateStars(rating) {
+        stars.forEach((star, index) => {
+            if (index < rating) {
+                star.style.color = '#ffc107';
+            } else {
+                star.style.color = '#ddd';
+            }
+        });
+    }
+
+    stars.forEach((star, index) => {
+        star.addEventListener('click', () => {
+            inputs[index].checked = true;
+            updateStars(index + 1);
+        });
+
+        star.addEventListener('mouseenter', () => {
+            updateStars(index + 1);
+        });
+    });
+
+    document.querySelector('.rating-stars').addEventListener('mouseleave', () => {
+        const checked = document.querySelector('.rating-stars input:checked');
+        if (checked) {
+            updateStars(parseInt(checked.value));
+        } else {
+            updateStars(0);
+        }
+    });
+
+    // Form validation
+    form.addEventListener('submit', function(e) {
+        let isValid = true;
+        let errorMessages = [];
+
+        // Check if rating is selected
+        const selectedRating = document.querySelector('.rating-stars input:checked');
+        if (!selectedRating) {
+            isValid = false;
+            errorMessages.push('Please select a rating.');
+        }
+
+        // Check comments validation
+        const comments = commentsTextarea.value.trim();
+        if (comments.length > 500) {
+            isValid = false;
+            errorMessages.push('Comments must not exceed 500 characters.');
+        }
+
+        if (!isValid) {
+            e.preventDefault();
+            alert(errorMessages.join('\n'));
+            return false;
+        }
+
+        return true;
+    });
+
+    // Real-time validation feedback
+    commentsTextarea.addEventListener('input', function() {
+        const comments = this.value.trim();
+        const charCount = comments.length;
+
+        // Remove existing error styling
+        this.classList.remove('error');
+
+        // Add visual feedback for character count
+        let helperText = '';
+        if (charCount > 500) {
+            helperText = `${charCount}/500 maximum characters exceeded`;
+            this.classList.add('error');
+        } else if (charCount > 0) {
+            helperText = `${charCount}/500 characters`;
+        }
+
+        // Update or create helper text
+        let helper = this.parentNode.querySelector('.char-count');
+        if (!helper) {
+            helper = document.createElement('small');
+            helper.className = 'char-count';
+            this.parentNode.appendChild(helper);
+        }
+        helper.textContent = helperText;
+    });
+});
+</script>
+{% endblock %}
+
+<style>
+.feedback-form {
+  max-width: 500px;
+  margin: auto;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.rating-container {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.5rem;
+  margin: 0.5rem 0;
+}
+
+.rating-stars {
+ display: flex;         /* Makes children line up horizontally */
+  flex-direction: row;   /* Optional, row is default */
+  gap: 5px;              /* Spacing between stars */
+  justify-content: center; /* Center the stars horizontally */
+  align-items: center;  
+}
+
+.rating-label {
+  font-size: 0.9rem;
+  color: #64748b;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* Completely hide radio buttons */
+.rating-stars input[type="radio"] {
+  display: none !important;
+  visibility: hidden !important;
+  width: 0 !important;
+  height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  background: transparent !important;
+  pointer-events: none !important;
+}
+
+/* Stars only */
+.rating-stars label {
+  font-size: 1.8rem;
+  color: #ddd;
+  cursor: pointer;
+  transition: color 0.2s ease;
+  line-height: 1;
+  margin: 0;
+  padding: 0;
+  display: inline-block;
+  white-space: nowrap;
+}
+
+.rating-stars label:hover,
+.rating-stars input[type="radio"]:checked + label,
+.rating-stars label.active {
+  color: #ffc107;
+}
+
+.form-control {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-family: inherit;
+  resize: vertical;
+}
+
+.form-control.error {
+  border-color: #dc3545;
+  box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+}
+
+.char-count {
+  display: block;
+  margin-top: 5px;
+  font-size: 0.875rem;
+  color: #6c757d;
+}
+
+.form-control.error + .char-count {
+  color: #dc3545;
+}
+
+.required {
+  color: #dc3545;
+  font-weight: bold;
+}
+
+.form-actions {
+  text-align: center;
+}
+
+.btn {
+  display: inline-block;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  text-decoration: none;
+  transition: background-color 0.3s;
+}
+
+.btn-primary {
+  background-color: #007bff;
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: #0056b3;
+}
+</style>

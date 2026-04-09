@@ -1,0 +1,24 @@
+# Python cache/bytecode
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Virtual environments
+venv/
+.venv/
+.venv2/
+
+# Environment files with secrets
+.env
+.env.*
+!.env.example
+
+# Local database and uploaded/private files
+db.sqlite3
+media/
+
+# Logs
+*.log
+
+# Django collected static files
+staticfiles/

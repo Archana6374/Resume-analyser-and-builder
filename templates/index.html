@@ -1,0 +1,380 @@
+<!-- {% load static %}
+
+<div class="resume-portal">
+  <section id="landing-section" class="hero-section">
+    <div class="hero-shell">
+      <span class="portal-badge">Smart Resume Workspace</span>
+      <h1>One Stop Resume Builder &amp; Analyzer</h1>
+      <p class="hero-lead">Build a polished resume, upload it into your existing analyzer, and check ATS readiness from one professional landing page.</p>
+      <nav class="top-nav portal-nav">
+        <a href="/">Home</a>
+        <a href="/analyzer/upload/">Resume Analyzer</a>
+        <a href="/builder/">Resume Builder</a>
+        <a href="/analyzer/score/">ATS Score</a>
+      </nav>
+      <div class="hero-actions">
+        <a class="hero-card" href="/analyzer/upload/">
+          <h3>Resume Analyzer</h3>
+          <p>Upload your PDF or DOCX resume and use the backend parser already working in Django.</p>
+          <small>Connected to your existing upload flow</small>
+        </a>
+        <a class="hero-card" href="/builder/">
+          <h3>Resume Builder</h3>
+          <p>Fill guided sections, generate resume content, and export your work.</p>
+          <small>Builder module from your frontend</small>
+        </a>
+        <a class="hero-card" href="/score/">
+          <h3>ATS Score</h3>
+          <p>Estimate keyword strength and resume completeness before you apply for jobs.</p>
+          <small>Instant feedback and score widget</small>
+        </a>
+      </div>
+      <div class="hero-upload-cta text-center mt-4">
+        <a href="/analyzer/upload/" class="btn btn-lg btn-primary">Upload Resume Now</a>
+      </div>
+      <div class="hero-metrics">
+        <div><strong>3 in 1</strong><span>Analyzer, Builder &amp; ATS Score</span></div>
+        <div><strong>PDF / DOCX</strong><span>Upload-ready backend flow</span></div>
+        <div><strong>Instant Preview</strong><span>Generate and export resume formats</span></div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script src="{% static 'js/script1.js' %}?v=6"></script>
+<script>if (typeof setVisible === 'function') setVisible('landing-section');</script> -->
+
+
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}AI Resume Analyzer{% endblock %}
+
+{% block extra_css %}
+<style>
+.hero-section {
+  min-height: calc(100vh - 88px);
+  background: linear-gradient(135deg, #4c6ef5 0%, #6678ff 55%, #7c66f5 100%);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  padding: 4rem 0;
+}
+.hero-shell {
+  width: 100%;
+  max-width: 1140px;
+  margin: 0 auto;
+  text-align: center;
+  padding: 0 1rem;
+}
+.portal-badge {
+  display: inline-block;
+  background: rgba(255,255,255,0.18);
+  color: #fff;
+  padding: 0.75rem 1.4rem;
+  border-radius: 999px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  margin-bottom: 1.5rem;
+}
+.hero-section h1 {
+  font-size: clamp(3rem, 4vw, 4.5rem);
+  line-height: 1.02;
+  margin-bottom: 1rem;
+}
+.hero-lead {
+  font-size: 1.2rem;
+  color: rgba(255,255,255,0.88);
+  max-width: 760px;
+  margin: 0 auto 2.2rem;
+}
+.top-nav.portal-nav {
+  display: inline-flex;
+  justify-content: center;
+  gap: 1.75rem;
+  flex-wrap: wrap;
+  margin: 0 auto 2.5rem;
+}
+.top-nav.portal-nav a {
+  color: rgba(255,255,255,0.95);
+  text-decoration: none;
+  font-weight: 600;
+}
+.top-nav.portal-nav a:hover {
+  color: #ffffff;
+}
+.hero-upload-cta .btn {
+  background: #ffffff;
+  color: #4c6ef5;
+  padding: 1rem 2.2rem;
+  border-radius: 999px;
+  font-size: 1rem;
+  font-weight: 700;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.18);
+}
+.features-section {
+  background: #f8f9ff;
+}
+.features-section h2,
+.how-it-works h2,
+.benefits-section h2 {
+  font-weight: 700;
+  margin-bottom: 2rem;
+}
+.feature-card {
+  border-radius: 26px;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.feature-card:hover {
+  transform: translateY(-12px);
+}
+.feature-card img {
+  width: 56px;
+  height: 56px;
+}
+.how-it-works .step-circle {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+.how-it-works .step-upload {
+  background: linear-gradient(135deg, #4c6ef5 0%, #8b5cf6 100%);
+}
+.how-it-works .step-ai {
+  background: linear-gradient(135deg, #06b6d4 0%, #0ea5e9 100%);
+}
+.how-it-works .step-insight {
+  background: linear-gradient(135deg, #f59e0b 0%, #f97316 100%);
+}
+.how-it-works .step-circle svg {
+  display: block;
+  width: 28px;
+  height: 28px;
+  color: #ffffff;
+}
+.how-it-works {
+  background: #f5f7ff;
+}
+.how-it-works .step-card {
+  background: #ffffff;
+  border-radius: 28px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: 0 20px 40px rgba(15, 23, 42, 0.08);
+}
+.how-it-works .step-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 24px 45px rgba(15, 23, 42, 0.1);
+}
+.how-it-works .step-card h5 {
+  margin-top: 1rem;
+  margin-bottom: 0.75rem;
+}
+.how-it-works .step-card p {
+  color: #4b5563;
+}
+.benefits-grid {
+  margin: 0;
+}
+.benefit-item {
+  background: #ffffff;
+  border: 1px solid rgba(76, 110, 245, 0.12);
+  min-height: 100%;
+}
+.benefit-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #4c6ef5;
+  color: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.benefit-item p {
+  margin: 0;
+  color: #3d4251;
+  line-height: 1.6;
+}
+.app-footer {
+  background: #0f172a;
+  color: #d8d9e2;
+  padding: 1.75rem 0;
+}
+.app-footer a {
+  color: #9db0ff;
+  text-decoration: none;
+  margin-right: 1rem;
+}
+.app-footer a:hover {
+  color: #fff;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<section id="home" class="hero-section">
+  <div class="hero-shell">
+    <span class="portal-badge">AI Resume Analyzer</span>
+    <h1>Build, Analyze & Improve Your Resume with AI</h1>
+    <p class="hero-lead">Optimize your resume for ATS systems and get instant AI-powered feedback to land your dream job.</p>
+    <div class="hero-upload-cta text-center mt-4">
+      <a href="/login/" class="btn btn-lg btn-primary">Login</a>
+    </div>
+  </div>
+</section>
+
+<section id="features" class="features-section py-5">
+  <div class="container">
+    <h2 class="text-center mb-5">Features</h2>
+    <div class="row g-4">
+      <div class="col-md-4">
+        <div class="card feature-card h-100 p-4 text-center shadow-sm">
+          <img src="https://img.icons8.com/fluency/48/000000/document.png" alt="Resume Builder" class="mb-4">
+          <h5>Resume Builder</h5>
+          <p>Create a polished resume from scratch using guided templates and structured sections.</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card feature-card h-100 p-4 text-center shadow-sm">
+          <img src="https://img.icons8.com/fluency/48/000000/search-property.png" alt="Resume Analyzer" class="mb-4">
+          <h5>Resume Analyzer</h5>
+          <p>Use intuitive tools to analyze experience, skills, and education with detailed insights.</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card feature-card h-100 p-4 text-center shadow-sm">
+          <img src="https://img.icons8.com/fluency/48/000000/combo-chart.png" alt="ATS Score" class="mb-4">
+          <h5>ATS Score & Suggestions</h5>
+          <p>Check ATS compatibility and get recommendations for better results.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="how-it-works" class="py-5 bg-light">
+  <div class="container">
+    <h2 class="text-center">How It Works</h2>
+    <div class="row g-4 mt-4">
+      <div class="col-md-3">
+        <div class="step-card p-4 h-100 rounded-4 shadow-sm">
+          <div class="step-circle step-upload mb-4">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 2L12 14M12 2L7 7M12 2L17 7M5 14H19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <h5>Upload Resume</h5>
+          <p>Simply upload your resume file to get started.</p>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="step-card p-4 h-100 rounded-4 shadow-sm">
+          <div class="step-circle step-ai mb-4">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 2C14.7614 2 17 4.23858 17 7C17 8.58452 16.367 10.0367 15.3284 11.1716C15.1096 11.4361 15 11.7686 15 12.1099V14.01C15 15.1089 14.1046 16 13 16H11C9.89543 16 9 15.1089 9 14.01V12.1099C9 11.7686 8.8904 11.4361 8.67161 11.1716C7.633 10.0367 7 8.58452 7 7C7 4.23858 9.23858 2 12 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M8 20H16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <h5>AI Analysis</h5>
+          <p>Our AI analyzes your resume for strengths and weaknesses.</p>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="step-card p-4 h-100 rounded-4 shadow-sm">
+          <div class="step-circle step-insight mb-4">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 3C8.13401 3 5 6.13401 5 10C5 12.9391 6.62124 15.544 9.25 16.8284V18C9.25 18.6904 9.80964 19.25 10.5 19.25H13.5C14.1904 19.25 14.75 18.6904 14.75 18V16.8284C17.3788 15.544 19 12.9391 19 10C19 6.13401 15.866 3 12 3Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M9.75 20.5H14.25" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <h5>Get Insights</h5>
+          <p>Receive detailed feedback and suggestions to improve.</p>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="step-card p-4 h-100 rounded-4 shadow-sm">
+          <div class="step-circle step-download mb-4">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 3V15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M7 12.5L12 17.5L17 12.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M5 21H19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <h5>Download Resume</h5>
+          <p>Save your improved resume to share with employers and apply confidently.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="benefits" class="benefits-section py-5">
+  <div class="container">
+    <h2 class="text-center">Benefits</h2>
+    <div class="row justify-content-center mt-4">
+      <div class="col-lg-10">
+        <div class="row g-3 benefits-grid">
+          <div class="col-md-6">
+            <div class="benefit-item p-4 rounded-4 shadow-sm d-flex gap-3 align-items-start">
+              <div class="benefit-icon">✓</div>
+              <p class="mb-0">ATS-friendly resumes that pass automated screening</p>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="benefit-item p-4 rounded-4 shadow-sm d-flex gap-3 align-items-start">
+              <div class="benefit-icon">✓</div>
+              <p class="mb-0">Skill gap detection to identify missing competencies</p>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="benefit-item p-4 rounded-4 shadow-sm d-flex gap-3 align-items-start">
+              <div class="benefit-icon">✓</div>
+              <p class="mb-0">Instant feedback with actionable improvement suggestions</p>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="benefit-item p-4 rounded-4 shadow-sm d-flex gap-3 align-items-start">
+              <div class="benefit-icon">✓</div>
+              <p class="mb-0">Professional analysis to enhance your job prospects</p>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="benefit-item p-4 rounded-4 shadow-sm d-flex gap-3 align-items-start">
+              <div class="benefit-icon">✓</div>
+              <p class="mb-0">Secure and private processing of your resume data</p>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="benefit-item p-4 rounded-4 shadow-sm d-flex gap-3 align-items-start">
+              <div class="benefit-icon">✓</div>
+              <p class="mb-0">Personalized recommendations to help you improve every section</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="contact" class="py-5 bg-light">
+  <div class="container text-center">
+    <h2>Contact</h2>
+    <p>Have questions? Reach us at support@example.com</p>
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/script1.js' %}?v=6"></script>
+<script>if (typeof setVisible === 'function') setVisible('home');</script>
+{% endblock %}

@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Welcome - AI Resume Pro{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="text-center mb-5">
+        <h1 class="display-5 fw-bold">AI Resume Pro</h1>
+        <p class="lead text-secondary">A modern resume platform for building, analyzing, and improving resumes.</p>
+        {% if google_login_url %}
+        <div class="d-flex justify-content-center gap-3 mt-4 flex-wrap">
+            <a href="{{ google_login_url }}" class="btn btn-light btn-lg border d-flex align-items-center gap-2" style="color:#1f2937;">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" width="20" height="20">
+                Continue with Google
+            </a>
+            <a href="/login/" class="btn btn-primary btn-lg">Login</a>
+            <a href="/login/" class="btn btn-outline-primary btn-lg">Start Now</a>
+        </div>
+        {% else %}
+        <div class="d-flex justify-content-center gap-3 mt-4">
+            <a href="/login/" class="btn btn-primary btn-lg">Login</a>
+            <a href="/login/" class="btn btn-outline-primary btn-lg">Start Now</a>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="row g-4 mb-5">
+        <div class="col-md-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <h3 class="card-title">Why this website?</h3>
+                    <p class="card-text">AI Resume Pro helps job seekers build a professional resume, analyze its content for ATS compatibility, and improve readability with action-driven suggestions.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <h3 class="card-title">What it contains</h3>
+                    <ul class="list-unstyled mb-0">
+                        <li>• Landing page overview</li>
+                        <li>• Login page for secure access</li>
+                        <li>• Resume upload and parsing</li>
+                        <li>• Text preprocessing and cleaning</li>
+                        <li>• Detailed analysis and ATS scoring</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <h3 class="card-title">How to use it</h3>
+                    <ol class="mb-0 ps-3">
+                        <li>Go to the landing page at <strong>/</strong>.</li>
+                        <li>Click <strong>Login</strong> or open <strong>/login/</strong>.</li>
+                        <li>After login, upload your resume at <strong>/upload/</strong>.</li>
+                        <li>Then view parsed results at <strong>/parsed/</strong> and preprocessing at <strong>/preprocessed/</strong>.</li>
+                        <li>Finally check analysis at <strong>/analysis/</strong> and score at <strong>/score/</strong>.</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-light rounded-4 p-4 shadow-sm">
+        <h2>Landing page structure</h2>
+        <p>This page is the website home. It explains the service and prompts visitors to login first.</p>
+        <p>After login, the resume upload page becomes available, followed by parsing, preprocessing, and analysis.</p>
+        <p>If login still does not open by clicking, use the direct URL below:</p>
+        <pre class="p-3 bg-white rounded">http://127.0.0.1:8000/login/</pre>
+    </div>
+</div>
+{% endblock %}

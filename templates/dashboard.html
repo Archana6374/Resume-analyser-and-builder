@@ -1,0 +1,385 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Profile - AI Resume Analyzer{% endblock %}
+
+{% block extra_css %}
+<style>
+  .dashboard-wrapper {
+    background-color: #f8f9fa;
+    padding: 2rem 0 3rem;
+    min-height: 100vh;
+  }
+
+  .dashboard-header {
+    margin-bottom: 2rem;
+  }
+
+  .dashboard-header h1 {
+    color: #1a1a1a;
+    font-weight: 700;
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .dashboard-header p {
+    color: #666666;
+    font-size: 1.1rem;
+  }
+
+  /* Stats Cards */
+  .stat-card {
+    background: #ffffff;
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    padding: 2rem;
+    transition: all 0.3s ease;
+    text-align: center;
+    border-left: 4px solid #0d6efd;
+  }
+
+  .stat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
+  }
+
+  .stat-value {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: #0d6efd;
+    margin-bottom: 0.5rem;
+  }
+
+  .stat-label {
+    color: #666666;
+    font-weight: 600;
+    font-size: 0.95rem;
+  }
+
+  /* Quick Action Cards */
+  .quick-action-card {
+    background: #ffffff;
+    border: 1px solid #e9ecef;
+    border-radius: 15px;
+    padding: 1.5rem;
+    text-align: center;
+    text-decoration: none;
+    color: inherit;
+    transition: all 0.3s ease;
+    display: block;
+    height: 100%;
+  }
+
+  .quick-action-card:hover {
+    border-color: #0d6efd;
+    box-shadow: 0 6px 16px rgba(13, 110, 253, 0.15);
+    transform: translateY(-4px);
+  }
+
+  .quick-action-icon {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    display: block;
+  }
+
+  .quick-action-card h6 {
+    color: #1a1a1a;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+
+  .quick-action-card small {
+    color: #999999;
+    display: block;
+  }
+
+  /* Resume List Card */
+  .resume-list-card {
+    background: #ffffff;
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+  }
+
+  .resume-item {
+    padding: 1.5rem;
+    border-bottom: 1px solid #f0f0f0;
+    transition: background 0.2s ease;
+  }
+
+  .resume-item:last-child {
+    border-bottom: none;
+  }
+
+  .resume-item:hover {
+    background-color: #f8f9fa;
+  }
+
+  .resume-filename {
+    color: #1a1a1a;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+  }
+
+  .resume-date {
+    color: #999999;
+    font-size: 0.9rem;
+  }
+
+  /* Score Badge */
+  .score-badge {
+    display: inline-block;
+    border-radius: 8px;
+    padding: 0.4rem 0.8rem;
+    font-weight: 700;
+    font-size: 0.85rem;
+  }
+
+  .score-badge.excellent {
+    background: #d4edda;
+    color: #155724;
+  }
+
+  .score-badge.good {
+    background: #cce5ff;
+    color: #0c5aa0;
+  }
+
+  .score-badge.fair {
+    background: #fff3cd;
+    color: #856404;
+  }
+
+  .score-badge.poor {
+    background: #f8d7da;
+    color: #721c24;
+  }
+
+  /* Tips Card */
+  .tips-card {
+    background: #ffffff;
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    padding: 2rem;
+  }
+
+  .tips-card h4 {
+    color: #1a1a1a;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+  }
+
+  .tip-item {
+    margin-bottom: 1.5rem;
+  }
+
+  .tip-item:last-child {
+    margin-bottom: 0;
+  }
+
+  .tip-item h6 {
+    color: #1a1a1a;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+
+  .tip-item small {
+    color: #666666;
+    line-height: 1.6;
+  }
+
+  /* Empty State */
+  .empty-state {
+    text-align: center;
+    padding: 3rem 2rem;
+  }
+
+  .empty-state-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.3;
+  }
+
+  .empty-state h6 {
+    color: #1a1a1a;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+
+  .empty-state p {
+    color: #666666;
+    margin-bottom: 1rem;
+  }
+
+  .section-title {
+    color: #1a1a1a;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    font-size: 1.3rem;
+  }
+
+  .view-analysis-btn {
+    border-radius: 8px;
+    padding: 0.5rem 1rem;
+    font-weight: 600;
+    font-size: 0.85rem;
+    border: 1px solid #0d6efd;
+    color: #0d6efd;
+    text-decoration: none;
+    transition: all 0.2s ease;
+  }
+
+  .view-analysis-btn:hover {
+    background: #0d6efd;
+    color: #ffffff;
+  }
+
+  @media (max-width: 768px) {
+    .dashboard-header h1 {
+      font-size: 1.8rem;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-wrapper">
+  <div class="container">
+    <!-- Header -->
+    <div class="dashboard-header">
+      <h1>{{ user.get_full_name|default:user.username }}'s Profile</h1>
+      <p>View your account summary, recent resumes, and your latest ATS progress after login.</p>
+    </div>
+
+    <!-- Stats Grid -->
+    <!-- <div class="row g-4 mb-5">
+      <div class="col-sm-6 col-lg-3">
+        <div class="stat-card">
+          <div class="stat-value">{{ total_resumes }}</div>
+          <div class="stat-label">Resumes Analyzed</div>
+        </div>
+      </div>
+      <div class="col-sm-6 col-lg-3">
+        <div class="stat-card">
+          <div class="stat-value">{{ avg_ats_score|default:'—' }}</div>
+          <div class="stat-label">Avg ATS Score</div>
+        </div>
+      </div>
+      <div class="col-sm-6 col-lg-3">
+        <div class="stat-card">
+          <div class="stat-value">{{ best_ats_score|default:'—' }}</div>
+          <div class="stat-label">Best ATS Score</div>
+        </div>
+      </div>
+      <div class="col-sm-6 col-lg-3">
+        <div class="stat-card">
+          <div class="stat-value">{{ avg_readability|default:'—' }}</div>
+          <div class="stat-label">Avg Readability</div>
+        </div>
+      </div>
+    </div> -->
+
+    <!-- Quick Actions -->
+    <div class="row g-3 mb-5">
+      <div class="col-6 col-lg-3">
+        <a href="/analyzer/upload/" class="quick-action-card">
+          <span class="quick-action-icon">📄</span>
+          <h6>Upload Resume</h6>
+          <small>Analyze a new resume</small>
+        </a>
+      </div>
+      <div class="col-6 col-lg-3">
+        <a href="/builder/" class="quick-action-card">
+          <span class="quick-action-icon">✏️</span>
+          <h6>Build Resume</h6>
+          <small>Create from scratch</small>
+        </a>
+      </div>
+      <div class="col-6 col-lg-3">
+        <a href="/analyzer/jobmatch/" class="quick-action-card">
+          <span class="quick-action-icon">🎯</span>
+          <h6>Job Matching</h6>
+          <small>Find matching jobs</small>
+        </a>
+      </div>
+      <div class="col-6 col-lg-3">
+        <a href="/" class="quick-action-card">
+          <span class="quick-action-icon">ℹ️</span>
+          <h6>Learn More</h6>
+          <small>View features</small>
+        </a>
+      </div>
+    </div>
+
+    <!-- Recent Resumes & Tips -->
+    <div class="row g-4">
+      <div class="col-lg-8">
+        <h4 class="section-title">Recent Resumes</h4>
+        {% if resumes %}
+          <div class="resume-list-card">
+            {% for resume in resumes %}
+              <div class="resume-item">
+                <div class="row align-items-center">
+                  <div class="col-md-6">
+                    <h6 class="resume-filename">{{ resume.original_filename }}</h6>
+                    <p class="resume-date mb-0">Uploaded: {{ resume.uploaded_at|date:"M d, Y" }}</p>
+                    <small class="text-muted">
+                      <strong>Words:</strong> {{ resume.word_count }} | 
+                      <strong>Type:</strong> {{ resume.file_type|upper }}
+                    </small>
+                  </div>
+                  <div class="col-md-3 text-md-end mt-3 mt-md-0">
+                    {% if resume.ats_score >= 80 %}
+                      <span class="score-badge excellent">{{ resume.ats_score }} ATS</span>
+                    {% elif resume.ats_score >= 65 %}
+                      <span class="score-badge good">{{ resume.ats_score }} ATS</span>
+                    {% elif resume.ats_score >= 50 %}
+                      <span class="score-badge fair">{{ resume.ats_score }} ATS</span>
+                    {% else %}
+                      <span class="score-badge poor">{{ resume.ats_score }} ATS</span>
+                    {% endif %}
+                  </div>
+                  <div class="col-md-3 text-md-end mt-3 mt-md-0">
+                    <a href="/analyzer/analysis/" class="view-analysis-btn">View Analysis</a>
+                  </div>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="resume-list-card">
+            <div class="empty-state">
+              <div class="empty-state-icon">📋</div>
+              <h6>No resumes yet</h6>
+              <p>Upload your first resume to get started with analysis and ATS scoring</p>
+              <a href="/analyzer/upload/" class="btn btn-primary" style="border-radius: 8px; padding: 10px 20px; font-weight: 600;">Upload Resume Now</a>
+            </div>
+          </div>
+        {% endif %}
+      </div>
+
+      <!-- Tips Sidebar -->
+      <div class="col-lg-4">
+        <h4 class="section-title">Quick Tips</h4>
+        <div class="tips-card">
+          <div class="tip-item">
+            <h6>🎯 ATS Optimization</h6>
+            <small>Use keywords from job descriptions, avoid complex formatting, and include all major sections (experience, education, skills).</small>
+          </div>
+          <div class="tip-item">
+            <h6>📝 Resume Best Practices</h6>
+            <small>Keep it concise (1-2 pages), use strong action verbs, quantify achievements with numbers, and tailor for each position.</small>
+          </div>
+          <div class="tip-item">
+            <h6>💡 Pro Tip</h6>
+            <small>Analyze multiple resume versions against different job descriptions to find the best match percentage.</small>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

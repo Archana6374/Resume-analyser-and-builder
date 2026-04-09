@@ -1,0 +1,530 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="resume-portal">
+<main class="container content-stack pb-4">
+  <!-- Upload Section -->
+  <section class="panel" style="background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%); border: 2px solid #2196f3;">
+    <div class="section-heading">
+      <h2>📤 Upload Resume for Analysis</h2>
+      <p>Get comprehensive insights about your resume</p>
+    </div>
+    <form method="POST" action="/analyzer/upload/" enctype="multipart/form-data" class="upload-form">
+      {% csrf_token %}
+      <div class="upload-area">
+        <input type="file" name="resumeFile" id="resumeFile" accept=".pdf,.docx" required>
+        <label for="resumeFile" class="upload-label">
+          <div class="upload-icon">📄</div>
+          <div class="upload-text">
+            <strong>Choose PDF or DOCX file</strong>
+            <small>Maximum file size: 10MB</small>
+          </div>
+        </label>
+      </div>
+      <button type="submit" class="btn btn-primary btn-lg w-100">Upload & Analyze Resume</button>
+    </form>
+  </section>
+
+  {% if resume and analysis %}
+  <!-- Analysis Results -->
+  <section class="panel">
+    <div class="section-heading">
+      <div>
+        <h2>Analysis Results</h2>
+        <p>Detailed insights for {{ resume.original_filename }}</p>
+      </div>
+      <div class="analysis-badges">
+        <span>ATS Score: {{ analysis.ats_friendly_score }}%</span>
+        <span>Readability: {{ analysis.flesch_score|floatformat:1 }}</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Key Insights -->
+  <section class="panel">
+    <div class="section-heading">
+      <h3>📊 Key Insights</h3>
+    </div>
+    <div class="insights-grid">
+      {% for insight in insights %}
+      <div class="insight-card">
+        <p>{{ insight }}</p>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <!-- Skills Analysis -->
+  {% if skills %}
+  <section class="panel">
+    <div class="section-heading">
+      <h3>🛠️ Skills Analysis</h3>
+    </div>
+    <div class="skills-analysis">
+      <div class="skill-category">
+        <h4>Technical Skills ({{ skills.technical|length }})</h4>
+        <div class="skill-visualization">
+          {% for skill in skills.technical %}
+          <div class="skill-bar">
+            <span class="skill-name">{{ skill }}</span>
+            <div class="skill-progress" style="width: 85%"></div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="skill-category">
+        <h4>Soft Skills ({{ skills.soft|length }})</h4>
+        <div class="skill-visualization">
+          {% for skill in skills.soft %}
+          <div class="skill-bar">
+            <span class="skill-name">{{ skill }}</span>
+            <div class="skill-progress soft" style="width: 75%"></div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </section>
+  {% endif %}
+
+  <!-- Readability Analysis -->
+  <section class="panel">
+    <div class="section-heading">
+      <h3>📖 Readability Analysis</h3>
+    </div>
+    <div class="readability-dashboard">
+      <div class="readability-metrics">
+        <div class="metric-card">
+          <div class="metric-value">{{ readability.flesch_score|floatformat:1 }}</div>
+          <div class="metric-label">Flesch Score</div>
+          <div class="metric-description">
+            {% if readability.flesch_score > 60 %}Excellent readability{% elif readability.flesch_score > 30 %}Good readability{% else %}Needs improvement{% endif %}
+          </div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-value">{{ readability.grade_level|floatformat:1 }}</div>
+          <div class="metric-label">Grade Level</div>
+          <div class="metric-description">
+            {% if readability.grade_level < 12 %}Accessible to most readers{% else %}May be too complex{% endif %}
+          </div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-value">{{ analysis.total_words }}</div>
+          <div class="metric-label">Word Count</div>
+          <div class="metric-description">
+            {% if analysis.total_words > 400 %}Detailed resume{% elif analysis.total_words > 200 %}Good length{% else %}Consider adding more content{% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ATS Compatibility -->
+  {% if ats_analysis %}
+  <section class="panel">
+    <div class="section-heading">
+      <h3>🎯 ATS Compatibility</h3>
+    </div>
+    <div class="ats-analysis">
+      <div class="ats-score-display">
+        <div class="score-circle" data-score="{{ ats_analysis.score }}">
+          <span class="score-number">{{ ats_analysis.score }}%</span>
+          <span class="score-label">ATS Score</span>
+        </div>
+      </div>
+
+      {% if ats_analysis.issues %}
+      <div class="ats-issues">
+        <h4>Issues Found:</h4>
+        <ul>
+          {% for issue in ats_analysis.issues %}
+          <li>{{ issue }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+      {% endif %}
+
+      <div class="ats-recommendations">
+        <h4>Recommendations:</h4>
+        <ul>
+          {% for rec in ats_analysis.recommendations %}
+          <li>{{ rec }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </section>
+  {% endif %}
+
+  <!-- Section Analysis -->
+  {% if sections %}
+  <section class="panel">
+    <div class="section-heading">
+      <h3>📑 Section Analysis</h3>
+    </div>
+    <div class="section-analysis">
+      {% for section_name, content in sections.items %}
+      <div class="section-card">
+        <div class="section-header">
+          <h4>{{ section_name|title }}</h4>
+          <span class="section-word-count">{{ content|wordcount }} words</span>
+        </div>
+        <div class="section-preview">
+          {{ content|truncatechars:200 }}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
+  <!-- Navigation -->
+  <section class="panel">
+    <div class="action-row">
+      <a href="/analyzer/parsed/" class="btn btn-primary">View Parsed Resume</a>
+      <a href="/analyzer/preprocessed/" class="btn btn-info">View Preprocessing</a>
+      <a href="/analyzer/score/" class="btn btn-success">Get Detailed Score</a>
+      <a href="/analyzer/jobmatch/" class="btn btn-warning">Job Matching</a>
+      <a href="/analyzer/upload/" class="btn btn-secondary">Upload Another</a>
+    </div>
+  </section>
+  {% endif %}
+</main>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.upload-form {
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.upload-area {
+  margin-bottom: 1.5rem;
+}
+
+.upload-label {
+  display: block;
+  border: 2px dashed #2196f3;
+  border-radius: 8px;
+  padding: 2rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: white;
+}
+
+.upload-label:hover {
+  border-color: #1976d2;
+  background: #f8f9ff;
+}
+
+.upload-icon {
+  font-size: 3rem;
+  margin-bottom: 0.5rem;
+}
+
+.upload-text strong {
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+.upload-text small {
+  color: #666;
+}
+
+.insights-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1rem;
+}
+
+.insight-card {
+  padding: 1rem;
+  background: #fff3cd;
+  border: 1px solid #ffeaa7;
+  border-radius: 8px;
+  border-left: 4px solid #f39c12;
+}
+
+.insight-card p {
+  margin: 0;
+  color: #856404;
+}
+
+.skills-analysis {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+}
+
+.skill-category h4 {
+  margin-bottom: 1rem;
+  color: #333;
+}
+
+.skill-visualization {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.skill-bar {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.skill-name {
+  min-width: 120px;
+  font-weight: 500;
+}
+
+.skill-progress {
+  flex: 1;
+  height: 8px;
+  background: #e9ecef;
+  border-radius: 4px;
+  position: relative;
+}
+
+.skill-progress::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background: linear-gradient(90deg, #28a745, #20c997);
+  border-radius: 4px;
+  width: var(--width, 0%);
+}
+
+.skill-progress.soft::after {
+  background: linear-gradient(90deg, #6f42c1, #e83e8c);
+}
+
+.readability-dashboard {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 2rem;
+}
+
+.readability-metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+}
+
+.metric-card {
+  text-align: center;
+  padding: 1.5rem;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.metric-value {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #007bff;
+  margin-bottom: 0.5rem;
+}
+
+.metric-label {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 0.5rem;
+}
+
+.metric-description {
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.ats-analysis {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: 2rem;
+  align-items: start;
+}
+
+.score-circle {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  background: conic-gradient(#28a745 0% var(--score), #e9ecef var(--score) 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+  position: relative;
+}
+
+.score-circle::before {
+  content: '';
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  right: 10px;
+  bottom: 10px;
+  background: white;
+  border-radius: 50%;
+}
+
+.score-number {
+  font-size: 1.8rem;
+  font-weight: bold;
+  color: #28a745;
+  position: relative;
+  z-index: 1;
+}
+
+.score-label {
+  font-size: 0.9rem;
+  color: #666;
+  position: relative;
+  z-index: 1;
+}
+
+.ats-issues, .ats-recommendations {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  border: 1px solid #dee2e6;
+}
+
+.ats-issues h4 {
+  color: #dc3545;
+  margin-bottom: 1rem;
+}
+
+.ats-recommendations h4 {
+  color: #28a745;
+  margin-bottom: 1rem;
+}
+
+.ats-issues ul, .ats-recommendations ul {
+  margin: 0;
+  padding-left: 1.5rem;
+}
+
+.ats-issues li, .ats-recommendations li {
+  margin-bottom: 0.5rem;
+}
+
+.section-analysis {
+  display: grid;
+  gap: 1rem;
+}
+
+.section-card {
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.section-header h4 {
+  margin: 0;
+  color: #333;
+}
+
+.section-word-count {
+  background: #007bff;
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 12px;
+  font-size: 0.8rem;
+}
+
+.section-preview {
+  padding: 1rem;
+  color: #666;
+  line-height: 1.5;
+}
+
+.action-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: center;
+}
+
+@media (max-width: 768px) {
+  .skills-analysis,
+  .ats-analysis {
+    grid-template-columns: 1fr;
+  }
+
+  .readability-metrics {
+    grid-template-columns: 1fr;
+  }
+
+  .insights-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .action-row {
+    flex-direction: column;
+  }
+
+  .action-row .btn {
+    width: 100%;
+  }
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // File input styling
+  const fileInput = document.getElementById('resumeFile');
+  const uploadLabel = document.querySelector('.upload-label');
+
+  fileInput.addEventListener('change', function() {
+    if (this.files.length > 0) {
+      const fileName = this.files[0].name;
+      uploadLabel.innerHTML = `
+        <div class="upload-icon">✅</div>
+        <div class="upload-text">
+          <strong>${fileName}</strong>
+          <small>File selected successfully</small>
+        </div>
+      `;
+    }
+  });
+
+  // ATS score circle animation
+  const scoreCircle = document.querySelector('.score-circle');
+  if (scoreCircle) {
+    const score = scoreCircle.dataset.score;
+    scoreCircle.style.setProperty('--score', score + '%');
+  }
+
+  // Skill progress bars animation
+  const skillBars = document.querySelectorAll('.skill-progress');
+  skillBars.forEach(bar => {
+    const width = bar.style.width;
+    bar.style.setProperty('--width', width);
+  });
+});
+</script>
+{% endblock %}
+</div>
+</div>

@@ -1,0 +1,645 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="resume-portal">
+<main class="container content-stack pb-4">
+  {% if resume %}
+  
+  <!-- Progress Indicator -->
+  <section class="panel">
+    <div class="progress-stepper">
+      <div class="stepper-item completed">
+        <div class="stepper-circle">✓</div>
+        <div class="stepper-label">Upload Resume</div>
+      </div>
+      <div class="stepper-line"></div>
+      <div class="stepper-item active">
+        <div class="stepper-circle">2</div>
+        <div class="stepper-label">Add Job Description</div>
+      </div>
+      <div class="stepper-line"></div>
+      <div class="stepper-item">
+        <div class="stepper-circle">3</div>
+        <div class="stepper-label">View Results</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="section-heading">
+      <div>
+        <h2>Job Match</h2>
+        <p>Resume-job compatibility analysis to help you tailor your resume for real roles.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Content -->
+  {% if not match_results %}
+  <section class="panel">
+    <div class="job-input-container">
+      <!-- Left Column: Paste Job Description -->
+      <div class="job-input-column">
+        <h3>Paste a Job Description</h3>
+        <p>Add the job description you want to match your resume against</p>
+        
+        <form method="post" action="/analyzer/jobmatch/" class="job-form" enctype="multipart/form-data">
+          {% csrf_token %}
+          
+          <div class="form-group">
+            <textarea
+              name="job_description"
+              id="job_description"
+              class="form-control job-textarea"
+              placeholder="Paste job description here..."
+              rows="12"
+            ></textarea>
+            <small class="form-help">Paste the complete job posting text</small>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-lg btn-block">
+            Analyze Match
+          </button>
+        </form>
+      </div>
+
+      <!-- Right Column: Predefined Job Titles -->
+      <div class="job-select-column">
+        <h3>Or Select a Job Title</h3>
+        <p>Quick match against common job postings</p>
+        
+        <div class="job-select-list">
+          <button type="button" class="job-select-btn" onclick="fillJobTitle('Software Engineer')">
+            Software Engineer
+          </button>
+          <button type="button" class="job-select-btn" onclick="fillJobTitle('Frontend Developer')">
+            Frontend Developer
+          </button>
+          <button type="button" class="job-select-btn" onclick="fillJobTitle('Backend Developer')">
+            Backend Developer
+          </button>
+          <button type="button" class="job-select-btn" onclick="fillJobTitle('Full Stack Developer')">
+            Full Stack Developer
+          </button>
+          <button type="button" class="job-select-btn" onclick="fillJobTitle('Python Developer')">
+            Python Developer
+          </button>
+          <button type="button" class="job-select-btn" onclick="fillJobTitle('Data Scientist')">
+            Data Scientist
+          </button>
+          <button type="button" class="job-select-btn" onclick="fillJobTitle('Data Analyst')">
+            Data Analyst
+          </button>
+          <button type="button" class="job-select-btn" onclick="fillJobTitle('Product Manager')">
+            Product Manager
+          </button>
+          <button type="button" class="job-select-btn" onclick="fillJobTitle('Project Manager')">
+            Project Manager
+          </button>
+          <button type="button" class="job-select-btn" onclick="fillJobTitle('DevOps Engineer')">
+            DevOps Engineer
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+  {% else %}
+
+  <!-- Match Results Section -->
+  <section class="panel results-section">
+    <div class="results-header">
+      <h2>Match Analysis Complete</h2>
+      <p>Job: {{ job_description_text }}</p>
+    </div>
+  </section>
+
+  <!-- Match Score Circle -->
+  <section class="panel">
+    <div class="match-score-container">
+      <div class="match-circle" data-score="{{ match_results.overall_score }}" style="--score: {{ match_results.overall_score }}%">
+        <span class="match-score">{{ match_results.overall_score }}%</span>
+        <span class="match-label">Match Score</span>
+      </div>
+      <div class="match-interpretation">
+        <h3>
+          {% if match_results.overall_score >= 80 %}Excellent Match!{% elif match_results.overall_score >= 70 %}Good Match{% elif match_results.overall_score >= 60 %}Fair Match{% else %}Low Match{% endif %}
+        </h3>
+        <p>
+          {% if match_results.overall_score >= 80 %}Your resume is well-aligned with this job position.{% elif match_results.overall_score >= 70 %}Your resume matches most requirements.{% elif match_results.overall_score >= 60 %}Your resume has some relevant experience but needs improvements.{% else %}Your resume needs significant tailoring for this role.{% endif %}
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Detailed Breakdown -->
+  <section class="panel">
+    <h3>Detailed Scores</h3>
+    <div class="score-breakdown-grid">
+      <div class="score-card">
+        <div class="score-value">{{ match_results.keyword_score }}%</div>
+        <div class="score-label">Keyword Match</div>
+        <div class="score-subtext">{{ match_results.keyword_coverage }}% coverage</div>
+      </div>
+      <div class="score-card">
+        <div class="score-value">{{ match_results.tech_score }}%</div>
+        <div class="score-label">Technical Skills</div>
+      </div>
+      <div class="score-card">
+        <div class="score-value">{{ match_results.soft_skills_score }}%</div>
+        <div class="score-label">Soft Skills</div>
+      </div>
+    </div>
+    <div class="keyword-stats">
+      <small>Analysis based on {{ match_results.total_resume_keywords }} resume keywords and {{ match_results.total_job_keywords }} job keywords</small>
+    </div>
+  </section>
+
+  <!-- Matched Keywords -->
+  <section class="panel">
+    <h3>Matched Keywords</h3>
+    <div class="keywords-container">
+      {% for keyword in match_results.matched_keywords %}
+      <span class="keyword-tag matched">{{ keyword }}</span>
+      {% empty %}
+      <p>No matched keywords found</p>
+      {% endfor %}
+    </div>
+  </section>
+
+  <!-- Missing Keywords -->
+  {% if match_results.missing_keywords %}
+  <section class="panel">
+    <h3>Missing Keywords</h3>
+    <div class="keywords-container">
+      {% for keyword in match_results.missing_keywords %}
+      <span class="keyword-tag missing">{{ keyword }}</span>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
+  <!-- Skills Gap -->
+  {% if match_results.missing_tech_skills or match_results.missing_soft_skills %}
+  <section class="panel">
+    <h3>Skills Gap Analysis</h3>
+    <div class="skills-gap-grid">
+      {% if match_results.missing_tech_skills %}
+      <div class="gap-section">
+        <h4>Missing Technical Skills</h4>
+        <div class="skills-list">
+          {% for skill in match_results.missing_tech_skills %}
+          <span class="skill-tag">{{ skill }}</span>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+      
+      {% if match_results.missing_soft_skills %}
+      <div class="gap-section">
+        <h4>Missing Soft Skills</h4>
+        <div class="skills-list">
+          {% for skill in match_results.missing_soft_skills %}
+          <span class="skill-tag">{{ skill }}</span>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+    </div>
+  </section>
+  {% endif %}
+
+  <!-- Suggestions -->
+  {% if suggestions %}
+  <section class="panel">
+    <h3>Improvement Suggestions</h3>
+    <div class="suggestions-list">
+      {% for suggestion in suggestions %}
+      <div class="suggestion-item">
+        <span class="suggestion-number">{{ forloop.counter }}</span>
+        <p>{{ suggestion }}</p>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
+  <!-- Navigation -->
+  <section class="panel">
+    <div class="action-row">
+      <a href="/analyzer/jobmatch/" class="btn btn-primary">Try Another Job</a>
+      <a href="/analyzer/score/" class="btn btn-secondary">Back to Score</a>
+      <a href="/analyzer/upload/" class="btn btn-outline-secondary">Upload New Resume</a>
+    </div>
+  </section>
+
+  {% endif %}
+
+  {% else %}
+  <!-- No resume found -->
+  <section class="panel">
+    <div class="section-heading">
+      <h2>Job Matching</h2>
+      <p>Upload your resume first</p>
+    </div>
+
+    <div class="fallback-match">
+      <div class="fallback-message">
+        <h4>Resume Not Found</h4>
+        <p>To use job matching, please upload your resume first.</p>
+      </div>
+
+      <div class="action-row">
+        <a href="/analyzer/upload/" class="btn btn-primary btn-lg">Upload Resume</a>
+        <a href="/" class="btn btn-outline-secondary">Back to Home</a>
+      </div>
+    </div>
+  </section>
+  {% endif %}
+
+</main>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.progress-stepper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin: 2rem 0;
+  flex-wrap: wrap;
+}
+
+.stepper-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.stepper-circle {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: #e9ecef;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  color: #666;
+  border: 2px solid #dee2e6;
+  font-size: 1.2rem;
+}
+
+.stepper-item.completed .stepper-circle {
+  background: #28a745;
+  color: white;
+  border-color: #28a745;
+}
+
+.stepper-item.active .stepper-circle {
+  background: #007bff;
+  color: white;
+  border-color: #0056b3;
+  box-shadow: 0 0 0 4px rgba(0, 123, 255, 0.25);
+}
+
+.stepper-label {
+  font-size: 0.9rem;
+  color: #666;
+  text-align: center;
+  min-width: 100px;
+}
+
+.stepper-line {
+  flex: 1;
+  height: 2px;
+  background: #dee2e6;
+  min-width: 40px;
+  max-width: 80px;
+}
+
+.job-input-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  margin: 2rem 0;
+}
+
+.job-input-column {
+  background: #f8f9fa;
+  padding: 2rem;
+  border-radius: 12px;
+  border: 1px solid #dee2e6;
+}
+
+.job-input-column h3 {
+  margin-top: 0;
+  color: #333;
+  font-size: 1.3rem;
+}
+
+.job-textarea {
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  font-family: 'Courier New', monospace;
+  font-size: 0.95rem;
+}
+
+.job-select-column {
+  background: #f8f9fa;
+  padding: 2rem;
+  border-radius: 12px;
+  border: 1px solid #dee2e6;
+  display: flex;
+  flex-direction: column;
+}
+
+.job-select-column h3 {
+  margin-top: 0;
+  color: #333;
+  font-size: 1.3rem;
+}
+
+.job-select-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.job-select-btn {
+  background: white;
+  border: 1px solid #dee2e6;
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #007bff;
+  text-decoration: none;
+  font-size: 0.95rem;
+}
+
+.job-select-btn:hover {
+  background: #007bff;
+  color: white;
+  border-color: #007bff;
+  transform: translateX(4px);
+}
+
+.results-section {
+  background: linear-gradient(135deg, #28a745, #20c997);
+  color: white;
+  text-align: center;
+}
+
+.results-header {
+  margin: 0;
+}
+
+.results-header h2 {
+  color: white;
+  margin: 0;
+  font-size: 1.8rem;
+}
+
+.results-header p {
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0.5rem 0 0 0;
+}
+
+.match-score-container {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  padding: 2rem;
+}
+
+.match-circle {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  background: conic-gradient(#28a745 0% var(--score), #e9ecef var(--score) 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  flex-shrink: 0;
+}
+
+.match-circle::before {
+  content: '';
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  right: 10px;
+  bottom: 10px;
+  background: white;
+  border-radius: 50%;
+}
+
+.match-score {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #28a745;
+  position: relative;
+  z-index: 1;
+}
+
+.match-label {
+  font-size: 0.9rem;
+  color: #666;
+  position: relative;
+  z-index: 1;
+}
+
+.match-interpretation h3 {
+  margin: 0 0 0.5rem 0;
+}
+
+.match-interpretation p {
+  margin: 0;
+  color: #666;
+}
+
+.score-breakdown-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+}
+
+.score-card {
+  background: linear-gradient(135deg, #007bff, #0056b3);
+  color: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.score-value {
+  font-size: 2rem;
+  font-weight: bold;
+}
+
+.score-label {
+  font-size: 0.9rem;
+  opacity: 0.9;
+}
+
+.score-subtext {
+  font-size: 0.75rem;
+  opacity: 0.8;
+  margin-top: 0.25rem;
+}
+
+.keyword-stats {
+  text-align: center;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #dee2e6;
+}
+
+.keywords-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.keyword-tag {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.keyword-tag.matched {
+  background: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.keyword-tag.missing {
+  background: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+.skills-gap-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+}
+
+.gap-section h4 {
+  margin-top: 0;
+  color: #333;
+}
+
+.skills-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.skill-tag {
+  display: inline-block;
+  background: #ffeaa7;
+  color: #d63031;
+  padding: 0.4rem 0.8rem;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.suggestions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.suggestion-item {
+  display: flex;
+  gap: 1rem;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-left: 4px solid #28a745;
+  border-radius: 4px;
+}
+
+.suggestion-number {
+  min-width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: #28a745;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  flex-shrink: 0;
+}
+
+.btn-block {
+  width: 100% !important;
+}
+
+@media (max-width: 768px) {
+  .job-input-container {
+    grid-template-columns: 1fr;
+  }
+  
+  .progress-stepper {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .stepper-line {
+    width: 2px;
+    height: 40px;
+    max-width: none;
+  }
+  
+  .match-score-container {
+    flex-direction: column;
+    text-align: center;
+  }
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function fillJobTitle(jobTitle) {
+  const jobDescriptions = {
+    'Software Engineer': 'We are looking for a talented Software Engineer to join our team. Experience with Python, Java, C++, or JavaScript required. Knowledge of web frameworks, databases, and cloud platforms preferred.',
+    'Frontend Developer': 'Seeking Frontend Developer with HTML, CSS, JavaScript expertise. React, Vue, or Angular experience required. Responsive design and cross-browser compatibility expected.',
+    'Backend Developer': 'Looking for Backend Developer with server-side programming skills. Python, Java, or Node.js experience necessary. APIs, databases, and cloud infrastructure knowledge required.',
+    'Full Stack Developer': 'Full Stack Developer needed. JavaScript, React/Vue for frontend, Node.js/Python for backend required. Database and deployment experience essential.',
+    'Python Developer': 'Python Developer with Django, Flask expertise required. Database and API development experience needed. Testing and documentation skills preferred.',
+    'Data Scientist': 'Data Scientist with Python, R, SQL expertise. Machine learning libraries experience required. Statistics and data visualization important.',
+    'Data Analyst': 'Data Analyst with SQL and Excel skills. BI tools like Tableau or Power BI required. Statistical analysis and Python/R beneficial.',
+    'Product Manager': 'Product Manager with strategic thinking skills. Product lifecycle experience required. Communication and market analysis important.',
+    'Project Manager': 'Project Manager with Agile/Scrum experience. Project planning and resource management required. Jira/Asana proficiency beneficial.',
+    'DevOps Engineer': 'DevOps Engineer with cloud infrastructure expertise. Docker and Kubernetes required. AWS/Azure/GCP knowledge essential. CI/CD pipeline experience needed.'
+  };
+  const description = jobDescriptions[jobTitle] || jobTitle;
+  document.getElementById('job_description').value = description;
+  document.getElementById('job_description').focus();
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  const matchCircle = document.querySelector('.match-circle');
+  if (matchCircle) {
+    const score = matchCircle.dataset.score;
+    matchCircle.style.setProperty('--score', score + '%');
+  }
+});
+</script>
+{% endblock %}

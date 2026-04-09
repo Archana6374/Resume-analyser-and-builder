@@ -1,0 +1,385 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="resume-portal">
+<main class="container content-stack pb-4">
+  <section class="panel">
+    <div class="section-heading">
+      <div>
+        <span class="eyebrow">Resume Analysis</span>
+        <h2>{{ resume.original_filename }}</h2>
+        <p>Uploaded on {{ resume.uploaded_at|date:"M d, Y" }} • {{ resume.get_file_size_mb }} MB • {{ resume.file_type|upper }}</p>
+      </div>
+      <div class="analysis-badges">
+        <span>{{ resume.word_count }} words</span>
+        <span>{{ resume.character_count }} characters</span>
+        <span>ATS Score: {{ resume.ats_score }}%</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact Information -->
+  {% if contact_info %}
+  <section class="panel">
+    <div class="section-heading">
+      <h3>Contact Information</h3>
+    </div>
+    <div class="contact-grid">
+      {% if contact_info.email %}
+      <div class="contact-item">
+        <strong>Email:</strong> {{ contact_info.email }}
+      </div>
+      {% endif %}
+      {% if contact_info.phone %}
+      <div class="contact-item">
+        <strong>Phone:</strong> {{ contact_info.phone }}
+      </div>
+      {% endif %}
+      {% if contact_info.linkedin %}
+      <div class="contact-item">
+        <strong>LinkedIn:</strong> <a href="{{ contact_info.linkedin }}" target="_blank">{{ contact_info.linkedin }}</a>
+      </div>
+      {% endif %}
+    </div>
+  </section>
+  {% endif %}
+
+  <!-- Skills Analysis -->
+  {% if skills %}
+  <section class="panel">
+    <div class="section-heading">
+      <h3>Skills Analysis</h3>
+    </div>
+    <div class="skills-grid">
+      {% if skills.technical %}
+      <div class="skills-category">
+        <h4>Technical Skills</h4>
+        <div class="skill-tags">
+          {% for skill in skills.technical %}
+          <span class="skill-tag technical">{{ skill }}</span>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+      {% if skills.soft %}
+      <div class="skills-category">
+        <h4>Soft Skills</h4>
+        <div class="skill-tags">
+          {% for skill in skills.soft %}
+          <span class="skill-tag soft">{{ skill }}</span>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+    </div>
+  </section>
+  {% endif %}
+
+  <!-- Top Keywords -->
+  {% if keywords %}
+  <section class="panel">
+    <div class="section-heading">
+      <h3>Top Keywords</h3>
+      <p>Most frequent terms in your resume</p>
+    </div>
+    <div class="keyword-cloud">
+      {% for keyword, count in keywords %}
+      <span class="keyword-item" data-weight="{{ count }}">{{ keyword }} ({{ count }})</span>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
+  <!-- Resume Sections -->
+  {% if sections %}
+  <section class="panel">
+    <div class="section-heading">
+      <h3>Resume Sections</h3>
+      <p>Automatically identified sections from your resume</p>
+    </div>
+    <div class="sections-accordion">
+      {% for section_name, content in sections.items %}
+      <div class="section-item">
+        <div class="section-header">
+          <h4>{{ section_name|title }}</h4>
+          <span class="section-toggle">+</span>
+        </div>
+        <div class="section-content">
+          <pre>{{ content }}</pre>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
+  <!-- Analysis Summary -->
+  {% if analysis %}
+  <section class="panel">
+    <div class="section-heading">
+      <h3>Analysis Summary</h3>
+    </div>
+    <div class="analysis-summary">
+      <div class="summary-stats">
+        <div class="stat-item">
+          <span class="stat-number">{{ analysis.total_words }}</span>
+          <span class="stat-label">Total Words</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-number">{{ analysis.unique_words }}</span>
+          <span class="stat-label">Unique Words</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-number">{{ analysis.flesch_score|floatformat:1 }}</span>
+          <span class="stat-label">Readability Score</span>
+        </div>
+      </div>
+
+      <div class="section-completeness">
+        <h4>Resume Completeness</h4>
+        <div class="completeness-checks">
+          <div class="check-item {{ analysis.has_contact_info|yesno:'complete,incomplete' }}">
+            <span class="check-icon">{{ analysis.has_contact_info|yesno:'✓,✗' }}</span>
+            Contact Information
+          </div>
+          <div class="check-item {{ analysis.has_summary|yesno:'complete,incomplete' }}">
+            <span class="check-icon">{{ analysis.has_summary|yesno:'✓,✗' }}</span>
+            Professional Summary
+          </div>
+          <div class="check-item {{ analysis.has_experience|yesno:'complete,incomplete' }}">
+            <span class="check-icon">{{ analysis.has_experience|yesno:'✓,✗' }}</span>
+            Work Experience
+          </div>
+          <div class="check-item {{ analysis.has_education|yesno:'complete,incomplete' }}">
+            <span class="check-icon">{{ analysis.has_education|yesno:'✓,✗' }}</span>
+            Education
+          </div>
+          <div class="check-item {{ analysis.has_skills|yesno:'complete,incomplete' }}">
+            <span class="check-icon">{{ analysis.has_skills|yesno:'✓,✗' }}</span>
+            Skills Section
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  {% endif %}
+
+  <!-- Navigation -->
+  <section class="panel">
+    <div class="action-row">
+      <a href="/analyzer/preprocessed/" class="btn btn-primary">View Preprocessing</a>
+      <a href="/analyzer/analysis/" class="btn btn-success">Full Analysis</a>
+      <a href="/analyzer/score/" class="btn btn-info">Get Score</a>
+      <a href="/analyzer/jobmatch/" class="btn btn-warning">Job Match</a>
+      <a href="/analyzer/upload/" class="btn btn-secondary">Upload Another</a>
+    </div>
+  </section>
+</main>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.contact-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+}
+
+.contact-item {
+  padding: 0.75rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border-left: 4px solid #007bff;
+}
+
+.skills-grid {
+  display: grid;
+  gap: 2rem;
+}
+
+.skill-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.skill-tag {
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.skill-tag.technical {
+  background: #e3f2fd;
+  color: #1565c0;
+}
+
+.skill-tag.soft {
+  background: #f3e5f5;
+  color: #7b1fa2;
+}
+
+.keyword-cloud {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.keyword-item {
+  padding: 0.25rem 0.5rem;
+  background: #fff3cd;
+  color: #856404;
+  border-radius: 4px;
+  font-size: 0.875rem;
+}
+
+.sections-accordion {
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+}
+
+.section-item {
+  border-bottom: 1px solid #dee2e6;
+}
+
+.section-item:last-child {
+  border-bottom: none;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background: #f8f9fa;
+  cursor: pointer;
+  border-radius: 8px 8px 0 0;
+}
+
+.section-header:hover {
+  background: #e9ecef;
+}
+
+.section-toggle {
+  font-weight: bold;
+  transition: transform 0.2s;
+}
+
+.section-content {
+  padding: 1rem;
+  background: white;
+  display: none;
+}
+
+.section-content pre {
+  white-space: pre-wrap;
+  font-family: inherit;
+  margin: 0;
+}
+
+.analysis-summary {
+  display: grid;
+  gap: 2rem;
+}
+
+.summary-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+}
+
+.stat-item {
+  text-align: center;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.stat-number {
+  display: block;
+  font-size: 2rem;
+  font-weight: bold;
+  color: #007bff;
+}
+
+.stat-label {
+  font-size: 0.875rem;
+  color: #6c757d;
+}
+
+.completeness-checks {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.check-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem;
+  border-radius: 4px;
+}
+
+.check-item.complete {
+  background: #d4edda;
+  color: #155724;
+}
+
+.check-item.incomplete {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.check-icon {
+  font-weight: bold;
+}
+
+.action-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: center;
+}
+
+@media (max-width: 768px) {
+  .contact-grid,
+  .summary-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .action-row {
+    flex-direction: column;
+  }
+
+  .action-row .btn {
+    width: 100%;
+  }
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Accordion functionality for sections
+  const sectionHeaders = document.querySelectorAll('.section-header');
+  sectionHeaders.forEach(header => {
+    header.addEventListener('click', function() {
+      const content = this.nextElementSibling;
+      const toggle = this.querySelector('.section-toggle');
+
+      if (content.style.display === 'block') {
+        content.style.display = 'none';
+        toggle.textContent = '+';
+      } else {
+        content.style.display = 'block';
+        toggle.textContent = '−';
+      }
+    });
+  });
+});
+</script>
+{% endblock %}
